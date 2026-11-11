@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nearby Device Scanner</title>
+<style>
+body {
+  background: #101827;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 25px;
+}
+h1 { color: #35d6a0; }
+button {
+  background: #35d6a0;
+  color: #101827;
+  border: none;
+  padding: 16px 25px;
+  border-radius: 10px;
+  font-size: 17px;
+  margin: 10px;
+}
+#result {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 25px;
+  overflow-wrap: anywhere;
+}
+</style>
+</head>
+<body>
+
+<h1>NearbyDeviceScanner</h1>
+<p>Bluetooth Device Detection</p>
+
+<button onclick="scanBluetooth()">Scan Bluetooth</button>
+<button onclick="disconnect()">Disconnect</button>
+
+<div id="result">
+  Ready to scan.
+</div>
+
+<script>
+let device = null;
+
+async function scanBluetooth() {
+  const result = document.getElementById("result");
+
+  try {
+    result.innerHTML = "Searching for a device...";
+
+    device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true
+    });
+
+    result.innerHTML =
+      "<h3>Device Found!</h3>" +
+      "<p>Name: " + (device.name || "Unknown") + "</p>" +
+      "<p>ID: " + device.id + "</p>" +
+      "<p>Connecting...</p>";
+
+    device.addEventListener("gattserverdisconnected", () => {
+      result.innerHTML = "Device disconnected.";
+    });
+
+    const server = await device.gatt.connect();
+
+    result.innerHTML =
+      "<h3>Connected!</h3>" +
+      "<p>Name: " + (device.name || "Unknown") + "</p>" +
+      "<p>Bluetooth connection successful.</p>";
+
+  } catch (error) {
+    result.innerHTML = "Error: " + error.message;
+  }
+}
+
+function disconnect() {
+  if (device && device.gatt.connected) {
+    device.gatt.disconnect();
+  }
+}
+</script>
+
+</body>
+</html>
